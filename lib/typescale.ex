@@ -3,14 +3,15 @@ defmodule Typescale do
   Week #1 Exercise -> calculate the font size of given list of headings.
   """
   @doc """
-  map, heading,base font, scale
+  arguments -> map, heading,base font, scale // calculate font sizes and put into a map by base size and scale // 
+  :math.pow(s,h) to calculate h th power of s  
   """
 
-  def fonts(map, 0, b, s) do
+  def calculate_fonts(map, 0, b, s) do
     Map.put(map, :p, b)
   end
 
-  def fonts(map, h, b, s) do
+  def calculate_fonts(map, h, b, s) do
     p = b * :math.pow(s, h)
     map = Map.put(map, h, p)
     h = h - 1
