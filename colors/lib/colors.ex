@@ -24,11 +24,6 @@ defmodule Colors do
 
     Stream.map(@ranges, &darken(pcolor, &1))
     |> color_strem_map
-
-    # |> Stream.map(&rgb(&1))
-    # |> Stream.map(&to_string(&1))
-    # |> Stream.with_index()
-    # |> Enum.reduce(%{}, fn {v, k}, acc -> Map.put(acc, k, v) end)
   end
 
   def to_light(color) do
