@@ -15,6 +15,17 @@ defmodule Colors do
   end
 
   @doc """
+  it expects a strings of excodes of primary and secondary colors and number of steps and it returns map contains primary to seconday variations
+  """
+  def color_map(primary, secondary, steps) do
+    ranges = 1..steps
+    # fragments = Enum.map(ranges, &(&1 * 0.01 * steps))
+
+    Stream.map(ranges, &mix(parse!(primary), parse!(secondary), &1 * 1 / steps))
+    |> color_strem_map
+  end
+
+  @doc """
   it return a map of 10 darkened variations of given color by CssColors.mix/3 function in a stream and used parse!/1 for string
    to rgb and used rgb/1 for hsl to rgb and to_strign/1 for rgb to hex code and wrapped each element to atuple alongside with index 
    and converted to a map by Enum.reduce and 
@@ -31,7 +42,7 @@ defmodule Colors do
     pcolor = parse!(color)
     dcolor = parse!("#ffffff")
 
-    Stream.map(@ranges, &mix(pcolor, dcolor, &1))
+    Stream.map(Enum.reverse(@ranges), &mix(pcolor, dcolor, &1))
     |> color_strem_map
   end
 
