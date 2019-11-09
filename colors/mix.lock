@@ -1,0 +1,3 @@
+%{
+  "css_colors": {:hex, :css_colors, "0.2.2", "b2878136d30d2352028c638accf5ce9cbd0036e5f286ba04032fdb3774f330f0", [:mix], [{:ecto, ">= 2.0.0", [hex: :ecto, repo: "hexpm", optional: true]}], "hexpm"},
+}
