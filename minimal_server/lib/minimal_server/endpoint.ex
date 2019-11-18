@@ -29,13 +29,14 @@ defmodule MinimalServer.Endpoint do
     end
   end
 
-  forward("/bot", to: Router)
-  # forward(“/bot”, to: MinimalServer.Router)
+  forward("", to: Router)
+
+  # match _ do
+  #   send_resp(conn, 404, "Requested page not found! ")
+  # end
 
   match _ do
     conn
-    |> put_resp_header("location", redirect_url())
-    |> put_resp_content_type("text/html")
     |> send_resp(302, redirect_body())
   end
 
