@@ -1,4 +1,4 @@
-defmodule MinimalServer.Router do
+defmodule Weather.Router do
   use Plug.Router
   plug(:match)
   plug(:dispatch)
@@ -10,32 +10,7 @@ defmodule MinimalServer.Router do
     |> send_resp(200, message())
   end
 
-  @primary "primary"
-  @secondary "secondary"
-  @steps "steps"
-  @prefix "#"
-  @country "country"
-  @city "city"
-
   get "/weather" do
-    conn
-    |> fetch_query_params
-
-    {status, body} =
-      case conn.query_params do
-        %{@country => country, @city => city} ->
-          {200, Poison.encode!(message(country, city))}
-
-        _ ->
-          {422, missing_data}
-      end
-
-    conn
-    |> put_resp_content_type(@content_type)
-    |> send_resp(status, body)
-  end
-
-  get "/simple" do
     conn
     |> fetch_query_params
 
@@ -54,30 +29,11 @@ defmodule MinimalServer.Router do
     |> send_resp(status, body)
   end
 
-  post "/mix" do
-    {status, body} =
-      case conn.body_params do
-        %{"primary" => primary, "secondary" => secondary, "steps" => steps} ->
-          {200, Poison.encode!(message(primary, secondary, steps))}
-
-        _ ->
-          {422, missing_data}
-      end
-
-    conn
-    |> put_resp_content_type(@content_type)
-    |> send_resp(status, body)
-  end
-
   defp message do
     Poison.encode!(%{
       response_type: "in_channel",
       text: "Hello from BOT :)"
     })
-  end
-
-  defp message(country, city) do
-    %{country: country, city: city, temprature: HtmlParser.weather(country, city)}
   end
 
   defp message(primary, secondary, steps) do
