@@ -9,31 +9,32 @@ defmodule FileDownload do
   it will create a process message by its PID and by receiving purticular structs the action to downlod will happend in receive do block
   """
   def download_file(url, destination) do
-    async_download = fn resp, fd, download_fn, data ->
+    async_download = fn resp, fd, download_fn, size, data ->
       resp_id = resp.id
 
       receive do
         %HTTPoison.AsyncStatus{code: status_code, id: ^resp_id} ->
           IO.inspect(status_code)
           HTTPoison.stream_next(resp)
-          download_fn.(resp, fd, download_fn, data)
+          download_fn.(resp, fd, download_fn, size, data)
 
         %HTTPoison.AsyncHeaders{headers: headers, id: ^resp_id} ->
-          IO.puts("The content length is#{headers[:"Content-Length"]}")
-
+          headers_map = Enum.into(headers, %{})
+          {content_length, _} = headers_map["Content-Length"] |> Integer.parse()
+          IO.puts("The total Size is #{mb(content_length)}")
           IO.inspect(headers)
           HTTPoison.stream_next(resp)
-          download_fn.(resp, fd, download_fn, data)
+          download_fn.(resp, fd, download_fn, content_length, data)
 
         %HTTPoison.AsyncChunk{chunk: chunk, id: ^resp_id} ->
           IO.binwrite(fd, chunk)
           accumulated_data = data <> chunk
           accumulated_byte = byte_size(accumulated_data)
-          # percent = (accumulated_byte / total_bytes * 100) |> Float.round(2)
-          IO.puts("#{mb(accumulated_byte)} Downloaded...")
+          percent = (accumulated_byte / size * 100) |> Float.round(2)
+          IO.puts("#{percent} % (#{mb(accumulated_byte)}) Downloaded...")
           HTTPoison.stream_next(resp)
 
-          download_fn.(resp, fd, download_fn, accumulated_data)
+          download_fn.(resp, fd, download_fn, size, accumulated_data)
 
         %HTTPoison.AsyncEnd{id: ^resp_id} ->
           File.close(fd)
@@ -44,7 +45,7 @@ defmodule FileDownload do
     # File.write!(destination, body)
     resp = HTTPoison.get!(url, %{}, stream_to: self(), async: :once)
     {:ok, fd} = File.open(destination, [:write, :binary])
-    async_download.(resp, fd, async_download, "")
+    async_download.(resp, fd, async_download, :unknown, "")
   end
 
   defp mb(bytes) do
