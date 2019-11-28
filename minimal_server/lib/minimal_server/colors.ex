@@ -8,6 +8,13 @@ defmodule Colors do
   @doc """
   it expects a string of hexcode of a color and it delegates to_black and to_white functions map of black and white
   variations
+
+  ## Examples 
+
+  iex> pallet=Colors.color_map("#1234ff","#ff1234",10)
+  iex> Map.fetch(pallet,9)
+  {:ok, "#1234FF"}
+
   """
   def b_w_variations(color) do
     Map.put(%{}, :black, to_dark(color))
@@ -19,7 +26,6 @@ defmodule Colors do
   """
   def color_map(primary, secondary, steps) do
     ranges = 1..steps
-    # fragments = Enum.map(ranges, &(&1 * 0.01 * steps))
 
     Stream.map(ranges, &mix(parse!(primary), parse!(secondary), &1 * 1 / steps))
     |> color_strem_map
@@ -46,11 +52,14 @@ defmodule Colors do
     |> color_strem_map
   end
 
-  def color_strem_map(stream) do
+  @doc """
+  it expects a stream as input and return a map by converting hsl to rgb and to string 
+  """
+  defp color_strem_map(stream) do
     stream
     |> Stream.map(&rgb(&1))
     |> Stream.map(&to_string(&1))
     |> Stream.with_index()
-    |> Enum.reduce(%{}, fn {v, k}, acc -> Map.put(acc, k, v) end)
+    |> Enum.reduce(%{}, fn {v, k}, acc -> Map.put(acc, "#{k}", v) end)
   end
 end

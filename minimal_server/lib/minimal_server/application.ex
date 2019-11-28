@@ -8,6 +8,7 @@ defmodule MinimalServer.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
+      MinimalServer.Redix,
       # Use Plug.Cowboy.child_spec/3 to register our endpoint as a plug
       Plug.Cowboy.child_spec(
         scheme: :http,

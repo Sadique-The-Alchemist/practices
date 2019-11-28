@@ -20,11 +20,11 @@ defmodule HtmlParser do
     end
   end
 
-  def temprat(temprature) do
+  defp temprat(temprature) do
     temprature
   end
 
-  def error do
+  defp error do
     "invalied country or city"
   end
 end

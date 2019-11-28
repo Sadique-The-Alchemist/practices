@@ -29,7 +29,9 @@ defmodule MinimalServer.MixProject do
       {:poison, "~> 3.1"},
       {:css_colors, "~> 0.2.0"},
       {:floki, "~> 0.23.0"},
-      {:httpoison, "~> 1.6"}
+      {:httpoison, "~> 1.6"},
+      {:redix, ">= 0.0.0"},
+      {:castore, ">= 0.0.0"}
     ]
   end
 end
