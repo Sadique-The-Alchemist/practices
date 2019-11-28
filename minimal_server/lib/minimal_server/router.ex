@@ -19,6 +19,8 @@ defmodule MinimalServer.Router do
   @result "result"
   @country "country"
   @city "city"
+  @temprature "temprature"
+  @cache_expire 86400
   @doc """
   home screen
   """
@@ -109,8 +111,25 @@ defmodule MinimalServer.Router do
   end
 
   defp message(country, city) do
-    %{country: country, city: city, temprature: HtmlParser.weather(country, city)}
-    Redix.command(:redix, ["HMSET", "weather_#{city}", @country, country, @city, city])
+    case Redix.command(:redix, ["HGETALL", "weather_#{city}"]) do
+      {:ok, [head | tail]} ->
+        cache_weather(%{}, [head | tail])
+
+      {:ok, []} ->
+        Redix.command(:redix, [
+          "HMSET",
+          "weather_#{city}",
+          @country,
+          country,
+          @city,
+          city,
+          @temprature,
+          HtmlParser.weather(country, city)
+        ])
+
+        Redix.command(:redix, ["EXPIRE", "weather_#{city}", @cache_expire])
+        %{country: country, city: city, temprature: HtmlParser.weather(country, city)}
+    end
   end
 
   defp index do
@@ -184,6 +203,24 @@ defmodule MinimalServer.Router do
   defp create_map([head | tail], map, key) do
     Map.put(map, key, Poison.decode!(head))
     |> decode(tail)
+  end
+
+  defp cache_weather(map, []) do
+    map
+  end
+
+  defp cache_weather(map, [head | tail]) do
+    case head do
+      @country -> weather_map(tail, map, @country)
+      @city -> weather_map(tail, map, @city)
+      @temprature -> weather_map(tail, map, @temprature)
+      _ -> cache_weather(map, tail)
+    end
+  end
+
+  defp weather_map([head | tail], map, key) do
+    Map.put(map, key, head)
+    |> cache_weather(tail)
   end
 
   match _ do
